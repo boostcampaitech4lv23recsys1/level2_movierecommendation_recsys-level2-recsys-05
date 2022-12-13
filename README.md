@@ -5,4 +5,3 @@
 - conda create -n 이름 python=3.8
 - conda activate 이름
 - cd code & pip install -r requirements.txt
-
