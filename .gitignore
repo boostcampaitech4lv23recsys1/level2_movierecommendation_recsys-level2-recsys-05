@@ -5,7 +5,7 @@
 code/__pycache__/
 code/*.py[cod]
 code/*$py.class
-
+code/output
 # C extensions
 code/*.so
 
