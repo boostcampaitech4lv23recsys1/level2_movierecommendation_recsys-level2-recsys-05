@@ -102,7 +102,6 @@ code/.mypy_cache/
 
 # input data, saved log, checkpoints
 code/saved/
-code/datasets/
 
 # editor, os cache directory
 code/.vscode/
