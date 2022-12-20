@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from base import BaseModel
-from utils.util import Encoder, LayerNorm
+from utils import Encoder, LayerNorm
 
 class MnistModel(BaseModel):
     def __init__(self, num_classes=10):
