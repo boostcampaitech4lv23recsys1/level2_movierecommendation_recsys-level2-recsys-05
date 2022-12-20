@@ -108,3 +108,10 @@ code/datasets/
 code/.vscode/
 code/.idea/
 code/__MACOSX/
+
+# eda checkpoints
+eda/.ipynb_checkpoints/*
+
+#poetry
+poetry.lock
+pyproject.toml
