@@ -112,6 +112,6 @@ code/__MACOSX/
 # eda checkpoints
 eda/.ipynb_checkpoints/*
 
-#peotry
-peotry.lock
+#poetry
+poetry.lock
 pyproject.toml
