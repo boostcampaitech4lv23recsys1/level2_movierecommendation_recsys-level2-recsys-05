@@ -102,8 +102,19 @@ code/.mypy_cache/
 
 # input data, saved log, checkpoints
 code/saved/
+output
 
 # editor, os cache directory
 code/.vscode/
 code/.idea/
 code/__MACOSX/
+
+# pycache
+code/base/__pycache__
+code/datasets/__pycache__
+code/logger/__pycache__
+code/model/__pycache__
+code/trainer/__pycache__
+code/utils/__pycache__
+
+nohup.out
