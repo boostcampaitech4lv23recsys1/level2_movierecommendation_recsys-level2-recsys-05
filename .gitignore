@@ -115,3 +115,9 @@ eda/.ipynb_checkpoints/*
 #poetry
 poetry.lock
 pyproject.toml
+
+# output
+code/output
+
+# pycache
+code/*/__pycache__
