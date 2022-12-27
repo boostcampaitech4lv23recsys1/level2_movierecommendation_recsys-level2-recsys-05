@@ -1,5 +1,8 @@
 /data/
 
+# wandb
+code/wandb/
+
 
 # Byte-compiled / optimized / DLL files
 code/__pycache__/

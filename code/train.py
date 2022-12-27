@@ -4,6 +4,7 @@ import os
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
+import wandb
 
 from datasets.datasets import SASRecDataset
 from model import S3RecModel
@@ -18,6 +19,8 @@ from utils import (
 
 
 def main():
+    wandb.login()
+    
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--data_dir", default="../data/train/", type=str)
@@ -70,6 +73,8 @@ def main():
     parser.add_argument("--using_pretrain", action="store_true")
 
     args = parser.parse_args()
+
+    wandb.init(project="movie-rec", entity="ai-tech-4-recsys-05", config=vars(args))
 
     set_seed(args.seed)
     check_path(args.output_dir)
@@ -144,6 +149,13 @@ def main():
         trainer.train(epoch)
 
         scores, _ = trainer.valid(epoch)
+
+        wandb.log({
+            "RECALL@5": scores[0],
+            "NDCG@5": scores[1],
+            "RECALL@10": scores[2],
+            "NDCG@10": scores[3],             
+        })
 
         early_stopping(np.array(scores[-1:]), trainer.model)
         if early_stopping.early_stop:
