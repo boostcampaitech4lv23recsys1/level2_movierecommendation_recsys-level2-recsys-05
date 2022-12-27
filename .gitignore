@@ -8,7 +8,7 @@ code/wandb/
 code/__pycache__/
 code/*.py[cod]
 code/*$py.class
-
+code/output
 # C extensions
 code/*.so
 
@@ -112,6 +112,18 @@ code/.vscode/
 code/.idea/
 code/__MACOSX/
 
+# eda checkpoints
+eda/.ipynb_checkpoints/*
+
+#poetry
+poetry.lock
+pyproject.toml
+
+# output
+code/output
+
+# pycache
+code/*/__pycache__
 # pycache
 code/base/__pycache__
 code/datasets/__pycache__
