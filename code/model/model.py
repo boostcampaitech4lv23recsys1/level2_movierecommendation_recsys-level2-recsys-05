@@ -1,8 +1,14 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+from scipy.sparse import csr_matrix
 from base import BaseModel
 from utils import Encoder, LayerNorm
+from sklearn.preprocessing import LabelEncoder
+
 
 class MnistModel(BaseModel):
     def __init__(self, num_classes=10):
@@ -255,3 +261,69 @@ class S3RecModel(BaseModel):
             module.weight.data.fill_(1.0)
         if isinstance(module, nn.Linear) and module.bias is not None:
             module.bias.data.zero_()
+
+
+class EaseModel():
+    def __init__(self):
+        self.user_enc = LabelEncoder()
+        self.item_enc = LabelEncoder()
+
+    def _get_users_and_items(self, df):
+        users = self.user_enc.fit_transform(df.loc[:, 'user'])
+        items = self.item_enc.fit_transform(df.loc[:, 'item'])
+        return users, items
+
+    def fit(self, df, lambda_: float = 0.5, implicit=True):
+        """
+        df: pandas.DataFrame with columns user_id, item_id and (rating)
+        lambda_: l2-regularization term
+        implicit: if True, ratings are ignored and taken as 1, else normalized ratings are used
+        """
+        users, items = self._get_users_and_items(df)
+        values = np.ones(df.shape[0]) if implicit else df['rating'].to_numpy() / df['rating'].max()
+
+        X = csr_matrix((values, (users, items))) # user가 x축, items가 y축인 행렬을 만든다고 생각
+        self.X = X
+        print("finish X matrix")
+        G = X.T.dot(X).toarray()
+        diagIndices = np.diag_indices(G.shape[0])
+        G[diagIndices] += lambda_
+        P = np.linalg.inv(G)
+        B = P / (-np.diag(P))
+        B[diagIndices] = 0
+
+        self.B = B
+        self.pred = X.dot(B)
+        print("finish B matrix")
+
+    def predict(self, train, users, items, k):
+        df = pd.DataFrame()
+        items = self.item_enc.transform(items)
+        dd = train.loc[train.user.isin(users)]
+        dd['ci'] = self.item_enc.transform(dd.item)
+        dd['cu'] = self.user_enc.transform(dd.user)
+
+        g = dd.groupby('user')
+        for user, group in tqdm(g):
+            watched = set(group['ci']) # 본 영화
+
+            # 본 영화를 item 중에 제거한 index list.
+            candidates = [item for item in items if item not in watched]
+            u = group['cu'].iloc[0] # 예측한 user 번호
+            pred = np.take(self.pred[u, :], candidates) # 유저의 예측 값중 후보들만 가져온다.
+            res = np.argpartition(pred, -k)[-k:] # Top 10
+            r = pd.DataFrame({
+                "user": [user] * len(res),
+                "item": np.take(candidates, res),
+                "score": np.take(pred, res)
+            }).sort_values('score', ascending=False)
+            df = df.append(r, ignore_index=True)
+        df['item'] = self.item_enc.inverse_transform(df['item'])
+        print("finish predict")
+        return df
+
+    def make_all_predicted(self):
+        all_ = pd.DataFrame(self.pred)
+        all_.to_csv(
+            "/workspace/output/all_result.csv", index=False
+        )
